@@ -6,6 +6,7 @@ import json
 import os
 import random
 import re
+import time
 import uuid
 from dataclasses import dataclass
 from http.cookiejar import Cookie
@@ -220,6 +221,7 @@ class TreeholeClient:
 
         with open(self.cookies_file, "w", encoding="utf-8") as f:
             json.dump(cookies, f, ensure_ascii=False, indent=2)
+        os.chmod(self.cookies_file, 0o600)
 
     def load_cookies(self) -> None:
         try:
@@ -278,19 +280,21 @@ class TreeholeClient:
             if msg == "请手机短信验证":
                 if not interactive:
                     return False
-                want = input("Send verification code (Y/n): ").strip().lower()
+                want = input("发送短信验证码 (Y/n): ").strip().lower()
                 if want != "y":
                     return False
                 self.send_message()
-                code = input("SMS verification code: ").strip()
+                code = input("短信验证码: ").strip()
                 self.login_by_message(code)
+                time.sleep(2)
                 continue
 
             if msg == "请进行令牌验证":
                 if not interactive:
                     return False
-                code = input("Mobile token code: ").strip()
+                code = input("手机令牌验证码: ").strip()
                 self.login_by_token(code)
+                time.sleep(2)
                 continue
 
             return False
